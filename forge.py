@@ -24,6 +24,13 @@ def __main():
         default=False,
     )
     parser.add_argument(
+        "-n",
+        "--namespace",
+        help="hero quest namespace (default: random)",
+        required=False,
+        default=None,
+    )
+    parser.add_argument(
         "--dry",
         action="store_true",
         help="do not compute links",
