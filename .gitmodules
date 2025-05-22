@@ -1,0 +1,3 @@
+[submodule "z_app_linker"]
+	path = z_app_linker
+	url = git@github.com:clement-gouin/z-app-linker

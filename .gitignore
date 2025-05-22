@@ -1,0 +1,11 @@
+.vscode
+venv
+__pycache__
+*.env
+*.txt
+*.png
+!data.sample.txt
+!requirements.txt
+!README.txt
+preview
+preview.png
