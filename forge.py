@@ -38,6 +38,10 @@ class SubScene:
         self.raw_content = []
         self.changes: list[str] = []
         self.actions: list[tuple[str, str | None]] = []
+        self.show: list[str] = []
+
+    def __repr__(self):
+        return self.full_name
 
     @property
     def full_name(self) -> str:
@@ -54,9 +58,10 @@ class SubScene:
                     self.changes += [args[0] + " = 1"]
                 elif cmd.lower() == "/end" and len(args) == 1:
                     self.changes += [args[0] + " = 2"]
+                elif cmd.lower() == "/show":
+                    self.show += [" ".join(args)]
                 else:
                     print(f"WARN: invalid command '{line}'", file=sys.stderr)
-                # TODO /show
             elif line.startswith("*"):
                 action_raw = line[2:]
             elif (
@@ -85,22 +90,35 @@ class SubScene:
             self.actions += [(action_raw, None)]
         return self
 
-    def link_scenes(self, subscene_names: list[str]) -> None:
+    def link_scenes(self, subscenes: dict[str, "SubScene"]) -> None:
         for i, action_data in enumerate(self.actions):
             action_raw, subscene_name = action_data
-            if subscene_name is not None and subscene_name not in subscene_names:
-                for other_subscene_name in subscene_names:
+            if subscene_name is not None and subscene_name not in subscenes:
+                for other_subscene_name in subscenes:
                     if other_subscene_name.startswith(subscene_name):
                         self.actions[i] = (action_raw, other_subscene_name)
                         break
                 else:
-                    print(
-                        f"WARN: ({self.full_name}) subscene not found '{subscene_name}'"
-                    )
+                    print(f"WARN: ({self}) subscene not found '{subscene_name}'")
                     self.actions[i] = (action_raw, None)
 
     def get_z_data(self, namespace: str, color: str | None = None) -> str:
-        return ""  # TODO
+        header = markdown.markdown("\n".join(self.raw_content)).replace("\n", "")
+        z_data = [header, namespace]
+        if color is not None:
+            if not re.match(r"^\d+, *\d+%$", color):
+                print(
+                    f"ERROR: invalid color '{color}' (must be hue, saturation like '180, 30%')",
+                    file=sys.stderr,
+                )
+                sys.exit(1)
+            z_data += [color]
+        z_data += [str(len(self.show)), *self.show]
+        z_data += [str(len(self.changes)), *self.changes]
+        # TODO actions
+        # print("---", self.full_name)
+        # print("\n".join(z_data))
+        return "\n".join(z_data)
 
     def get_app(self, **kwargs) -> linker.Link:
         return linker.Link(APP, name_to_link(self.name), self.get_z_data(**kwargs))
@@ -110,6 +128,9 @@ class Scene:
     def __init__(self, name: str):
         self.name = escape_name(name)
         self.subscenes: list[SubScene] = []
+
+    def __repr__(self):
+        return f"{self.name} (#{len(self.subscenes)})"
 
     def parse(self, lines: list[str]) -> "Scene":
         scene_data = []
@@ -140,13 +161,6 @@ class Scene:
             ]
         return self
 
-    def get_all_subscene_names(self) -> list[str]:
-        return [subscene.full_name for subscene in self.subscenes]
-
-    def link_scenes(self, subscene_names: list[str]) -> None:
-        for subscene in self.subscenes:
-            subscene.link_scenes(subscene_names)
-
     def get_apps(self, **kwargs) -> list[linker.Link]:
         return [subscene.get_app(**kwargs) for subscene in self.subscenes]
 
@@ -168,7 +182,7 @@ def get_md_files(dir: str) -> list[str]:
     return sorted(files)
 
 
-def read_scene_file(path: str) -> Scene:
+def parse_scene_file(path: str) -> Scene:
     try:
         with open(path) as file:
             raw_content = file.readlines()
@@ -182,12 +196,17 @@ def read_scene_file(path: str) -> Scene:
 
 
 def link_scenes(scenes: list["Scene"]) -> None:
-    subscene_names = []
+    show = set()
+    subscenes = dict()
     for scene in scenes:
-        subscene_names += scene.get_all_subscene_names()
-    print(subscene_names)
+        for subscene in scene.subscenes:
+            subscenes[subscene.full_name] = subscene
+            show.update(subscene.show)
     for scene in scenes:
-        scene.link_scenes(subscene_names)
+        for subscene in scene.subscenes:
+            subscene.link_scenes(subscenes)
+            subscene.show = list(show)
+    print(f"INFO: linked {len(subscenes)} subscenes")
 
 
 def scenes_to_apps(scenes: list["Scene"], **kwargs) -> list[linker.Link]:
@@ -243,7 +262,9 @@ def __main():
 
     files = get_md_files(args.dir_path)
 
-    scenes = [read_scene_file(path) for path in files]
+    scenes = [parse_scene_file(path) for path in files]
+
+    print(f"INFO: parsed {len(scenes)} scenes")
 
     link_scenes(scenes)
 
@@ -254,7 +275,7 @@ def __main():
     linker.link_all_apps(apps)
 
     if args.preview:
-        print(f"generating preview for {len(apps)} elements...")
+        print(f"INFO: generating preview for {len(apps)} elements...")
         linker.Preview(apps).compute()
 
     if not args.dry:

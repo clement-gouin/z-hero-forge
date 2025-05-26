@@ -1,6 +1,6 @@
 # Scene 1
 
-Scene content (always chown under the title)
+Scene content (always shown under the title)
 
 ![](https://unsplash.com/photos/Gbs3a-8C8Pc/download?ixid=M3wxMjA3fDB8MXxzZWFyY2h8MXx8cXVlc3R8ZW58MHx8fHwxNzQ3OTIxMTgxfDI&force=true&w=640)
 
