@@ -51,7 +51,7 @@ Subscene 2 content (added to scene content)
 <!-- utility to set a flag to 2, equals to: /set QUEST_2 = 2-->
 /end QUEST_2
 
-<!-- you can link to first subscene with #-->
+<!-- you can link to these subscene with #-->
 * Link 1
   * [[#]]
 <!-- you can link to another subscene with #key-->
