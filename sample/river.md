@@ -14,7 +14,7 @@
 
 /set steps=Math.max(steps-10,0)
 
-* {!WATER} <i icon=milk></i> Fill you bottle
+* {!WATER} <i icon=milk></i> Fill your bottle
   * [[#fill]]
 * {WATER} <i icon=milk></i> Your bottle is already full
 * <i icon=droplet></i> Drink some water
