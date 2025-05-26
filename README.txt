@@ -1,4 +1,6 @@
-usage: forge.py [-h] [-n NAMESPACE] [-c COLOR] [-s START] [-p] [-d] DIR
+usage: forge.py [-h] [-n NAMESPACE] [-c COLOR] [-s START] [-p] [-d]
+                [--output OUTPUT]
+                DIR
 
 creates a z-hero-quest adventure from markdown data (see sample directory)
 
@@ -17,3 +19,4 @@ options:
                         name)
   -p, --preview         show links tree in a preview.png file
   -d, --dry             do not compute links
+  --output OUTPUT       create a z-app linker file
