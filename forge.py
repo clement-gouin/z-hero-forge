@@ -4,42 +4,63 @@ import os
 import re
 import sys
 import argparse
+import pathlib
 
 # submodule library
 import z_app_linker.linker as linker
 
 # external library
 import dotenv
+import markdown
 
 
 class SubScene:
-    def __init__(self):
+    def __init__(self, scene_name: str, name: str):
+        self.scene_name = scene_name
+        self.name = escape_name(name)
+        self.link_name = name_to_link(name)
+        self.changes: list[str] = []
+        self.actions: list[tuple[str, str | None]] = []
         # TODO
-        pass
+
+    def parse(self, lines: list[str]) -> "SubScene":
+        # TODO
+        return self
 
     def get_app(self) -> linker.Link:
         pass  # TODO
 
 
 class Scene:
-    def __init__(self):
-        # TODO
-        pass
+    def __init__(self, name: str):
+        self.name = escape_name(name)
+        self.subscenes: list[SubScene] = []
 
-    @classmethod
-    def from_raw_content(cls, lines: list[str]) -> "Scene":
-        # TODO
-        return Scene()
+    def parse(self, lines: list[str]) -> "Scene":
+        common_data = []
+        scene_data = []
+        scene_name = None
+        for line in lines:
+            line = line.replace("\n", "")
+            if line.startswith("##"):
+                if scene_name is not None:
+                    self.subscenes += [
+                        SubScene(self.name, scene_name).parse(common_data + scene_data)
+                    ]
+                scene_name = line[2:].strip()
+                scene_data = []
+            elif scene_name is None:
+                common_data += [line]
+            else:
+                scene_data += [line]
+        if scene_name is not None:
+            self.subscenes += [
+                SubScene(self.name, scene_name).parse(common_data + scene_data)
+            ]
+        return self
 
-    def get_apps(self) -> linker.Link:
-        pass  # TODO
-
-    @classmethod
-    def convert_to_apps(cls, scenes: list["Scene"]) -> list[linker.Link]:
-        apps = []
-        for scene in scenes:
-            apps += scene.get_apps()
-        return apps
+    def get_apps(self, **kwargs) -> list[linker.Link]:
+        return [subscene.get_app(**kwargs) for subscene in self.subscenes]
 
 
 def get_md_files(dir: str) -> list[str]:
@@ -51,10 +72,10 @@ def get_md_files(dir: str) -> list[str]:
             if os.path.isfile(path) and file.endswith(".md"):
                 files += [path]
     except:
-        print(f"Cannot read directory '{dir}'", file=sys.stderr)
+        print(f"ERROR: Cannot read directory '{dir}'", file=sys.stderr)
         sys.exit(1)
     if len(files) == 0:
-        print(f"No markdown files found in '{dir}'", file=sys.stderr)
+        print(f"ERROR: No markdown files found in '{dir}'", file=sys.stderr)
         sys.exit(1)
     return sorted(files)
 
@@ -63,10 +84,25 @@ def read_scene_file(path: str) -> Scene:
     try:
         with open(path) as file:
             raw_content = file.readlines()
-            return Scene.from_raw_content(raw_content)
+            return Scene(pathlib.Path(path).stem).parse(raw_content)
     except:
-        print(f"Cannot read '{path}'", file=sys.stderr)
+        print(f"ERROR: Cannot read '{path}'", file=sys.stderr)
         sys.exit(1)
+
+
+def scenes_to_apps(scenes: list["Scene"], **kwargs) -> list[linker.Link]:
+    apps = []
+    for scene in scenes:
+        apps += scene.get_apps(**kwargs)
+    return apps
+
+
+def escape_name(name: str) -> str:
+    return re.sub(r"[^\w\.\-#]", "", name)
+
+
+def name_to_link(name: str) -> str:
+    return f"LINK_{name.upper()}_"
 
 
 def __main():
@@ -117,7 +153,7 @@ def __main():
 
     scenes = [read_scene_file(path) for path in files]
 
-    apps = Scene.convert_to_apps(scenes)
+    apps = scenes_to_apps(scenes)
 
     linker.link_all_apps(apps)
 

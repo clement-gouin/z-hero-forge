@@ -1,3 +1,4 @@
 python-dotenv>=1.0.1
 lzstring>=1.0.4
 graphviz>=0.20.3
+markdown-it-py>=3.0.0
