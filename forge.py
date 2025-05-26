@@ -22,10 +22,6 @@ def escape_name(name: str) -> str:
     return re.sub(r"[^\w\.\-#]", "", name)
 
 
-def name_to_link(name: str) -> str:
-    return f"LINK_{name.upper()}_"
-
-
 def random_str(size: int) -> str:
     return "".join(random.choices(string.ascii_letters + string.digits, k=size))
 
@@ -34,7 +30,6 @@ class SubScene:
     def __init__(self, scene_name: str, name: str):
         self.scene_name = scene_name
         self.name = escape_name(name)
-        self.link_name = name_to_link(name)
         self.raw_content = []
         self.changes: list[str] = []
         self.actions: list[tuple[str, str | None]] = []
@@ -136,8 +131,9 @@ class SubScene:
             if subscene_name is None:
                 html_content = html_content_disabled
             else:
-                link_name = name_to_link(subscene_name)
-                html_content = f'<a class=button href="{link_name}">{button_title}</a>'
+                html_content = (
+                    f'<a class=button href="{subscene_name}">{button_title}</a>'
+                )
             if len(full_condition):
                 z_data_actions += ["&&".join(full_condition), html_content]
             else:
@@ -151,12 +147,10 @@ class SubScene:
             self.changes += [f"{rand_var}=Math.random()*100"]
         z_data += [str(len(self.changes)), *self.changes]
         z_data += z_data_actions
-        print("---", self.full_name)
-        print("\n".join(z_data))
         return "\n".join(z_data)
 
     def get_app(self, **kwargs) -> linker.Link:
-        return linker.Link(APP, name_to_link(self.name), self.get_z_data(**kwargs))
+        return linker.Link(APP, self.full_name, self.get_z_data(**kwargs))
 
 
 class Scene:
@@ -251,6 +245,15 @@ def scenes_to_apps(scenes: list["Scene"], **kwargs) -> list[linker.Link]:
     return apps
 
 
+def make_linker_output(apps: list[linker.Link], path: str) -> None:
+    path = os.path.abspath(path)
+    separator = linker.APPS[APP][0] * 5
+    with open(path, mode="w") as file:
+        for app in apps:
+            file.write(separator + " " + app.link_name + "\n" + app.data + "\n")
+    print(f"INFO: generated z-app linker file at '{path}'")
+
+
 def __main():
     parser = argparse.ArgumentParser(
         description="creates a z-hero-quest adventure from markdown data (see sample directory)"
@@ -293,6 +296,11 @@ def __main():
         help="do not compute links",
         default=False,
     )
+    parser.add_argument(
+        "--output",
+        help="create a z-app linker file",
+        default=None,
+    )
     args = parser.parse_args()
 
     files = get_md_files(args.dir_path)
@@ -308,6 +316,9 @@ def __main():
     apps = scenes_to_apps(scenes, namespace=namespace, color=args.color)
 
     linker.link_all_apps(apps)
+
+    if args.output:
+        make_linker_output(apps, args.output)
 
     if args.preview:
         print(f"INFO: generating preview for {len(apps)} elements...")
