@@ -53,11 +53,11 @@ class SubScene:
             if line.startswith("/"):
                 cmd, *args = line.split(" ")
                 if cmd.lower() == "/set":
-                    self.changes += [" ".join(args)]
+                    self.changes += [" ".join(args).replace(" = ", "=")]
                 elif cmd.lower() == "/start" and len(args) == 1:
-                    self.changes += [args[0] + " = 1"]
+                    self.changes += [args[0] + "=1"]
                 elif cmd.lower() == "/end" and len(args) == 1:
-                    self.changes += [args[0] + " = 2"]
+                    self.changes += [args[0] + "=2"]
                 elif cmd.lower() == "/show":
                     self.show += [" ".join(args)]
                 else:
@@ -114,10 +114,45 @@ class SubScene:
                 sys.exit(1)
             z_data += [color]
         z_data += [str(len(self.show)), *self.show]
+        rand_var = None
+        z_data_actions = []
+        for action_raw, subscene_name in self.actions:
+            full_condition = []
+            button_title = action_raw
+            with_invert = False
+            for match in re.findall(r"[\[\{][^\]\}]+[\]\}]", action_raw):
+                condition = match[1:-1]
+                if re.match(r"^\d+\.?\d*%$", condition):
+                    if rand_var is None:
+                        rand_var = "rand_" + random_str(4).lower()
+                    full_condition += [f"({rand_var}<{condition[:-1]})"]
+                else:
+                    full_condition += [f"({condition})"]
+                if match.startswith("{"):
+                    button_title = button_title.replace(match, "")
+            html_content_disabled = (
+                f'<span class="button disabled">{button_title}</span>'
+            )
+            if subscene_name is None:
+                html_content = html_content_disabled
+            else:
+                link_name = name_to_link(subscene_name)
+                html_content = f'<a class=button href="{link_name}">{button_title}</a>'
+            if len(full_condition):
+                z_data_actions += ["&&".join(full_condition), html_content]
+            else:
+                z_data_actions += ["true", html_content]
+            if with_invert:
+                z_data_actions += [
+                    "!(" + "&&".join(full_condition) + ")",
+                    html_content_disabled,
+                ]
+        if rand_var is not None:
+            self.changes += [f"{rand_var}=Math.random()*100"]
         z_data += [str(len(self.changes)), *self.changes]
-        # TODO actions
-        # print("---", self.full_name)
-        # print("\n".join(z_data))
+        z_data += z_data_actions
+        print("---", self.full_name)
+        print("\n".join(z_data))
         return "\n".join(z_data)
 
     def get_app(self, **kwargs) -> linker.Link:
