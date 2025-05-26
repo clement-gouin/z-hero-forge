@@ -19,7 +19,7 @@ APP = "https://clement-gouin.github.io/z-hero-quest"
 
 
 def escape_name(name: str) -> str:
-    return re.sub(r"[^\w\.\-#]", "", name)
+    return re.sub(r"[^\w\.\-#]", "", name.replace(" ", "_"))
 
 
 def random_str(size: int) -> str:
@@ -34,6 +34,8 @@ class SubScene:
         self.changes: list[str] = []
         self.actions: list[tuple[str, str | None]] = []
         self.show: list[str] = []
+        self.show_global: list[str] = []
+        self.has_error = False
 
     def __repr__(self):
         return self.full_name
@@ -55,8 +57,11 @@ class SubScene:
                     self.changes += [args[0] + "=2"]
                 elif cmd.lower() == "/show":
                     self.show += [" ".join(args)]
+                elif cmd.lower() == "/global":
+                    self.show_global += [" ".join(args)]
                 else:
                     print(f"WARN: invalid command '{line}'", file=sys.stderr)
+                    self.has_error = True
             elif line.startswith("*"):
                 action_raw = line[2:]
             elif (
@@ -80,6 +85,11 @@ class SubScene:
                 if action_raw is not None:
                     self.actions += [(action_raw, None)]
                     action_raw = None
+                    print(
+                        f"WARN: action without link '{action_raw}' / '{line.strip()}'",
+                        file=sys.stderr,
+                    )
+                    self.has_error = True
                 self.raw_content += [line]
         if action_raw is not None:
             self.actions += [(action_raw, None)]
@@ -95,6 +105,7 @@ class SubScene:
                         break
                 else:
                     print(f"WARN: ({self}) subscene not found '{subscene_name}'")
+                    self.has_error = True
                     self.actions[i] = (action_raw, None)
 
     def get_z_data(self, namespace: str, color: str | None = None) -> str:
@@ -108,8 +119,13 @@ class SubScene:
                 )
                 sys.exit(1)
             z_data += [color]
-        z_data += [str(len(self.show)), *self.show]
+        z_data += [
+            str(len(self.show_global + self.show)),
+            *self.show_global,
+            *self.show,
+        ]
         rand_var = None
+        percent_start = 0
         z_data_actions = []
         for action_raw, subscene_name in self.actions:
             full_condition = []
@@ -120,7 +136,14 @@ class SubScene:
                 if re.match(r"^\d+\.?\d*%$", condition):
                     if rand_var is None:
                         rand_var = "rand_" + random_str(4).lower()
-                    full_condition += [f"({rand_var}<{condition[:-1]})"]
+                    percent_value = float(condition[:-1])
+                    if percent_start == 0:
+                        full_condition += [f"({rand_var}<{percent_value})"]
+                    else:
+                        full_condition += [
+                            f"({rand_var}>{percent_start}&&{rand_var}<{percent_start+percent_value})"
+                        ]
+                    percent_start += percent_value
                 else:
                     full_condition += [f"({condition})"]
                 if match.startswith("{"):
@@ -225,17 +248,23 @@ def parse_scene_file(path: str) -> Scene:
 
 
 def link_scenes(scenes: list["Scene"]) -> None:
-    show = set()
-    subscenes = dict()
+    show_global: set[str] = set()
+    subscenes: dict[str, SubScene] = dict()
     for scene in scenes:
         for subscene in scene.subscenes:
             subscenes[subscene.full_name] = subscene
-            show.update(subscene.show)
+            show_global.update(subscene.show_global)
     for scene in scenes:
         for subscene in scene.subscenes:
             subscene.link_scenes(subscenes)
-            subscene.show = list(show)
+            subscene.show_global = list(show_global)
     print(f"INFO: linked {len(subscenes)} subscenes")
+
+
+def count_errors(scenes: list["Scene"]) -> int:
+    return sum(
+        sum(subscene.has_error for subscene in scene.subscenes) for scene in scenes
+    )
 
 
 def scenes_to_apps(scenes: list["Scene"], **kwargs) -> list[linker.Link]:
@@ -294,6 +323,11 @@ def __main():
         help="create a z-app linker file",
         default=None,
     )
+    parser.add_argument(
+        "--force",
+        help="force computation even with errors",
+        default=None,
+    )
     args = parser.parse_args()
 
     files = get_md_files(args.dir_path)
@@ -303,6 +337,14 @@ def __main():
     print(f"INFO: parsed {len(scenes)} scenes")
 
     link_scenes(scenes)
+
+    errors = count_errors(scenes)
+
+    if errors > 0:
+        print(f"WARN: {errors} errors found", file=sys.stderr)
+        if not args.force:
+            print(f"(pass --force to continue)", file=sys.stderr)
+            sys.exit(1)
 
     namespace = args.namespace if args.namespace is not None else random_str(10)
 

@@ -10,3 +10,4 @@ preview
 preview.png
 *.md
 !sample/*.md
+.obsidian
