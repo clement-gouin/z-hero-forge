@@ -148,6 +148,8 @@ class SubScene:
                     full_condition += [f"({condition})"]
                 if match.startswith("{"):
                     button_title = button_title.replace(match, "")
+                else:
+                    with_invert = True
             html_content_disabled = (
                 f'<span class="button disabled">{button_title}</span>'
             )

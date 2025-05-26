@@ -31,7 +31,7 @@ You're walking into the forest...
 * {steps>10}{10%} <i icon=ear></i> You ear water running nearby (-10 <i icon=footprints></i>)
   * [[river]]
 <!-- shown conditions can be set with [] and javascript syntax, when not fulfilled they will be disabled -->
-* <i icon=milk></i> [WATER] drink some water (+10 <i icon=footprints></i>)
+* <i icon=milk></i> [WATER] drink some water (+20 <i icon=footprints></i>)
   * [[#water]]
 
 ## 4_leaf
@@ -72,7 +72,7 @@ It wasn't in this bush...
 
 You drink some refreshing water...
 
-It boosts your resolve and you gain +20 <i icon=footprints></i>.
+It feel refreshed and you gain +20 <i icon=footprints></i>.
 
 /set WATER=0
 /set steps=steps+20
