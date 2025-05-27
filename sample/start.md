@@ -2,9 +2,9 @@
 <!-- scene main content, will be shown on each subscene -->
 # z-hero-quest sample
 
-This sample adventure was made with z-hero-forge.
-
 ![](https://images.unsplash.com/photo-1537557209696-c595cc42018d?w=640)
+
+This sample adventure was made with z-hero-forge.
 
 <!-- end of scene main content -->
 <!-- subscene key / name (default one is first) -->
@@ -23,9 +23,10 @@ Click the button below to start the demo
 Hope you enjoyed this little demo !
 
 See:
+
 <!-- you can still make bullet list by adding an offset -->
-  * Web-based adventure app: [z-hero-quest](https://github.com/clement-gouin/z-hero-quest/) (Github repository)
-  * Markdown to app converter: [z-hero-forge](https://github.com/clement-gouin/z-hero-forge/) (Github repository)
+- Web-based adventure app: [z-hero-quest](https://github.com/clement-gouin/z-hero-quest/) (Github repository)
+- Markdown to app converter: [z-hero-forge](https://github.com/clement-gouin/z-hero-forge/) (Github repository)
 
 <!-- so you can play again -->
 /set steps=110

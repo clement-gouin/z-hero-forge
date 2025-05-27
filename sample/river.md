@@ -5,6 +5,7 @@
 
 /show steps,footprints,110
 
+<!-- these actions will be applied to all scenes as it is on the main content -->
 * <i icon=trees></i> Go back into the forest (-10 <i icon=footprints></i>)
   * [[forest]]
 * {steps<10} (end demo)
