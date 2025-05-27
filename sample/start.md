@@ -2,7 +2,7 @@
 <!-- scene main content, will be shown on each subscene -->
 # z-hero-quest sample
 
-This sample adventure was made with z-hero-quest-forge.
+This sample adventure was made with z-hero-forge.
 <!-- end of scene main content -->
 <!-- subscene key / name (default one is first) -->
 ## default
