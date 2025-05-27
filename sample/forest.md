@@ -1,7 +1,7 @@
 <!-- see files in this order: start/forest/river -->
 # Forest
 
-![](https://images.unsplash.com/photo-1448375240586-882707db888b?q=80&w=640&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)
+![](https://images.unsplash.com/photo-1448375240586-882707db888b?w=640)
 
 <!-- /show command set tracked values (see z-hero-quest "variables" format) in this scene/subscene (here all subscenes as it is before first subscene key) -->
 /show steps,footprints,110

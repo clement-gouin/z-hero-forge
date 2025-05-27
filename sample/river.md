@@ -1,7 +1,7 @@
 <!-- see files in this order: start/forest/river -->
 # River
 
-![](https://images.unsplash.com/photo-1547929798-737b93ec2515?q=80&w=640&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)
+![](https://images.unsplash.com/photo-1547929798-737b93ec2515?w=640)
 
 /show steps,footprints,110
 
