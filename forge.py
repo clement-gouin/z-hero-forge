@@ -137,7 +137,18 @@ class SubScene:
             "\n".join(self.raw_content),
             extensions=MARKDOWN_EXTENSIONS,
             extension_configs={
-                "pymdownx.b64": {"base_path": os.path.dirname(self.path)}
+                "pymdownx.b64": {"base_path": os.path.dirname(self.path)},
+                "pymdownx.blocks.admonition": {
+                    "types": [
+                        "note",
+                        "info",
+                        "warn",
+                        "warning",
+                        "success",
+                        "danger",
+                        "error",
+                    ]
+                },
             },
         ).replace("\n", "")
         z_data = [header, namespace]
