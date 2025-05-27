@@ -17,6 +17,29 @@ import markdown
 
 APP = "https://clement-gouin.github.io/z-hero-quest"
 
+MARKDOWN_EXTENSIONS = [
+    "markdown.extensions.attr_list",
+    "markdown.extensions.def_list",
+    "markdown.extensions.tables",
+    "pymdownx.b64",
+    "pymdownx.betterem",
+    "pymdownx.blocks.admonition",
+    "pymdownx.blocks.definition",
+    "pymdownx.blocks.details",
+    "pymdownx.caret",
+    "pymdownx.details",
+    "pymdownx.emoji",
+    "pymdownx.escapeall",
+    "pymdownx.fancylists",
+    "pymdownx.magiclink",
+    "pymdownx.mark",
+    "pymdownx.progressbar",
+    "pymdownx.saneheaders",
+    "pymdownx.smartsymbols",
+    "pymdownx.tasklist",
+    "pymdownx.tilde",
+]
+
 
 def escape_name(name: str) -> str:
     return re.sub(r"[^\w\.\-#]", "", name.replace(" ", "_"))
@@ -27,7 +50,8 @@ def random_str(size: int) -> str:
 
 
 class SubScene:
-    def __init__(self, scene_name: str, name: str):
+    def __init__(self, path: str, scene_name: str, name: str):
+        self.path = path
         self.scene_name = scene_name
         self.name = escape_name(name)
         self.raw_content = []
@@ -47,7 +71,7 @@ class SubScene:
     def parse(self, lines: list[str]) -> "SubScene":
         action_raw = None
         for line in lines:
-            if line.startswith("/"):
+            if re.match(r"^/\w+", line):
                 cmd, *args = line.split(" ")
                 if cmd.lower() == "/set":
                     self.changes += [" ".join(args).replace(" = ", "=")]
@@ -109,7 +133,13 @@ class SubScene:
                     self.actions[i] = (action_raw, None)
 
     def get_z_data(self, namespace: str, color: str | None = None) -> str:
-        header = markdown.markdown("\n".join(self.raw_content)).replace("\n", "")
+        header = markdown.markdown(
+            "\n".join(self.raw_content),
+            extensions=MARKDOWN_EXTENSIONS,
+            extension_configs={
+                "pymdownx.b64": {"base_path": os.path.dirname(self.path)}
+            },
+        ).replace("\n", "")
         z_data = [header, namespace]
         if color is not None:
             if not re.match(r"^\d+, *\d+%$", color):
@@ -179,8 +209,9 @@ class SubScene:
 
 
 class Scene:
-    def __init__(self, name: str):
-        self.name = escape_name(name)
+    def __init__(self, path: str):
+        self.path = path
+        self.name = escape_name(pathlib.Path(path).stem)
         self.subscenes: list[SubScene] = []
 
     def __repr__(self):
@@ -196,10 +227,10 @@ class Scene:
             if len(line) and not len(line_escaped.strip()):
                 continue
             line = line_escaped
-            if line.startswith("##"):
+            if re.match(r"#{2}[^#]+", line):
                 if subscene_name is not None:
                     self.subscenes += [
-                        SubScene(self.name, subscene_name).parse(
+                        SubScene(self.path, self.name, subscene_name).parse(
                             scene_data + subscene_data
                         )
                     ]
@@ -211,7 +242,9 @@ class Scene:
                 subscene_data += [line]
         if subscene_name is not None:
             self.subscenes += [
-                SubScene(self.name, subscene_name).parse(scene_data + subscene_data)
+                SubScene(self.path, self.name, subscene_name).parse(
+                    scene_data + subscene_data
+                )
             ]
         return self
 
@@ -243,7 +276,7 @@ def parse_scene_file(path: str) -> Scene:
             if len(raw_content) == 0:
                 print(f"ERROR: Empty scene file '{path}'", file=sys.stderr)
                 sys.exit(1)
-            return Scene(pathlib.Path(path).stem).parse(raw_content)
+            return Scene(path).parse(raw_content)
     except OSError:
         print(f"ERROR: Cannot read '{path}'", file=sys.stderr)
         sys.exit(1)
@@ -287,7 +320,10 @@ def make_linker_output(apps: list[linker.Link], path: str) -> None:
 
 def __main():
     parser = argparse.ArgumentParser(
-        description="creates a z-hero-quest adventure from markdown data (see sample directory)"
+        description="creates a z-hero-quest adventure from markdown data (see sample directory)",
+        formatter_class=argparse.RawTextHelpFormatter,
+        epilog="Markdown syntax uses extensions defined in https://python-markdown.github.io/extensions/ and https://facelessuser.github.io/pymdown-extensions/\nActive extensions:\n* "
+        + "\n* ".join(MARKDOWN_EXTENSIONS),
     )
     parser.add_argument(
         "dir_path", help="data file path (default: data.txt)", metavar="DIR"

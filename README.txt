@@ -1,4 +1,6 @@
-usage: forge.py [-h] [-n NAMESPACE] [-c COLOR] [-p] [-d] [--output OUTPUT] DIR
+usage: forge.py [-h] [-n NAMESPACE] [-c COLOR] [-p] [-d] [--output OUTPUT]
+                [--force FORCE]
+                DIR
 
 creates a z-hero-quest adventure from markdown data (see sample directory)
 
@@ -10,8 +12,31 @@ options:
   -n NAMESPACE, --namespace NAMESPACE
                         hero quest namespace (default: random)
   -c COLOR, --color COLOR
-                        hero quest color as: Hue (number), Saturation
-                        (percent) (default: 180, 30%)
+                        hero quest color as: Hue (number), Saturation (percent)  (default: 180, 30%)
   -p, --preview         show links tree in a preview.png file
   -d, --dry             do not compute links
   --output OUTPUT       create a z-app linker file
+  --force FORCE         force computation even with errors
+
+Markdown syntax uses extensions defined in https://python-markdown.github.io/extensions/ and https://facelessuser.github.io/pymdown-extensions/
+Active extensions:
+* markdown.extensions.attr_list
+* markdown.extensions.def_list
+* markdown.extensions.tables
+* pymdownx.b64
+* pymdownx.betterem
+* pymdownx.blocks.admonition
+* pymdownx.blocks.definition
+* pymdownx.blocks.details
+* pymdownx.caret
+* pymdownx.details
+* pymdownx.emoji
+* pymdownx.escapeall
+* pymdownx.fancylists
+* pymdownx.magiclink
+* pymdownx.mark
+* pymdownx.progressbar
+* pymdownx.saneheaders
+* pymdownx.smartsymbols
+* pymdownx.tasklist
+* pymdownx.tilde
