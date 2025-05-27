@@ -246,6 +246,10 @@ class Scene:
                     scene_data + subscene_data
                 )
             ]
+        elif not len(self.subscenes) and len(scene_data):
+            self.subscenes += [
+                SubScene(self.path, self.name, "default").parse(scene_data)
+            ]
         return self
 
     def get_apps(self, **kwargs) -> list[linker.Link]:
