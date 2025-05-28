@@ -58,7 +58,7 @@ class SubScene:
         self.changes: list[str] = []
         self.actions: list[tuple[str, str | None]] = []
         self.show: list[str] = []
-        self.show_global: list[str] = []
+        self.color: str | None = None
         self.has_error = False
 
     def __repr__(self):
@@ -81,8 +81,8 @@ class SubScene:
                     self.changes += [args[0] + "=2"]
                 elif cmd.lower() == "/show":
                     self.show += [" ".join(args)]
-                elif cmd.lower() == "/global":
-                    self.show_global += [" ".join(args)]
+                elif cmd.lower() == "/color":
+                    self.color = " ".join(args)
                 else:
                     print(f"WARN: invalid command '{line}'", file=sys.stderr)
                     self.has_error = True
@@ -132,7 +132,7 @@ class SubScene:
                     self.has_error = True
                     self.actions[i] = (action_raw, None)
 
-    def get_z_data(self, namespace: str, color: str | None = None) -> str:
+    def get_z_data(self, namespace: str) -> str:
         header = markdown.markdown(
             "\n".join(self.raw_content),
             extensions=MARKDOWN_EXTENSIONS,
@@ -152,17 +152,16 @@ class SubScene:
             },
         ).replace("\n", "")
         z_data = [header, namespace]
-        if color is not None:
-            if not re.match(r"^\d+, *\d+%$", color):
+        if self.color is not None:
+            if not re.match(r"^\d+\.?\d*, *\d+\.?\d*%$", self.color):
                 print(
-                    f"ERROR: invalid color '{color}' (must be hue, saturation like '180, 30%')",
+                    f"ERROR: invalid color '{self.color}' (must be hue, saturation like '180, 30%')",
                     file=sys.stderr,
                 )
                 sys.exit(1)
-            z_data += [color]
+            z_data += [self.color]
         z_data += [
-            str(len(self.show_global + self.show)),
-            *self.show_global,
+            str(len(self.show)),
             *self.show,
         ]
         rand_var = None
@@ -298,16 +297,13 @@ def parse_scene_file(path: str) -> Scene:
 
 
 def link_scenes(scenes: list["Scene"]) -> None:
-    show_global: set[str] = set()
     subscenes: dict[str, SubScene] = dict()
     for scene in scenes:
         for subscene in scene.subscenes:
             subscenes[subscene.full_name] = subscene
-            show_global.update(subscene.show_global)
     for scene in scenes:
         for subscene in scene.subscenes:
             subscene.link_scenes(subscenes)
-            subscene.show_global = list(show_global)
     print(f"INFO: linked {len(subscenes)} subscenes")
 
 
@@ -337,7 +333,7 @@ def __main():
     parser = argparse.ArgumentParser(
         description="creates a z-hero-quest adventure from markdown data (see sample directory)",
         formatter_class=argparse.RawTextHelpFormatter,
-        epilog="Markdown syntax uses extensions defined in https://python-markdown.github.io/extensions/ and https://facelessuser.github.io/pymdown-extensions/\nActive extensions:\n* "
+        epilog="Markdown syntax uses extensions defined in https://python-markdown.github.io/extensions/ and https://facelessuser.github.io/pymdown-extensions/ \nActive extensions:\n* "
         + "\n* ".join(MARKDOWN_EXTENSIONS),
     )
     parser.add_argument(
@@ -347,13 +343,6 @@ def __main():
         "-n",
         "--namespace",
         help="hero quest namespace (default: random)",
-        required=False,
-        default=None,
-    )
-    parser.add_argument(
-        "-c",
-        "--color",
-        help="hero quest color as: Hue (number), Saturation (percent)  (default: 180, 30%%)",
         required=False,
         default=None,
     )
@@ -401,7 +390,7 @@ def __main():
 
     namespace = args.namespace if args.namespace is not None else random_str(10)
 
-    apps = scenes_to_apps(scenes, namespace=namespace, color=args.color)
+    apps = scenes_to_apps(scenes, namespace=namespace)
 
     linker.link_all_apps(apps)
 

@@ -5,7 +5,9 @@
 
 <!-- /show command set tracked values (see z-hero-quest "variables" format) in this scene/subscene (here all subscenes as it is before first subscene key) -->
 /show steps,footprints,110
-<!-- /global command set tracked values accross ALL SCENES -->
+
+<!-- /color command set app color (see z-hero-quest "color" format) in this scene/subscene -->
+/color 124.48,55.37%
 
 ## default
 

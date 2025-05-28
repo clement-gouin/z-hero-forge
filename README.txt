@@ -1,4 +1,4 @@
-usage: forge.py [-h] [-n NAMESPACE] [-c COLOR] [-p] [-d] [--output OUTPUT]
+usage: forge.py [-h] [-n NAMESPACE] [-p] [-d] [--output OUTPUT]
                 [--force FORCE]
                 DIR
 
@@ -11,14 +11,12 @@ options:
   -h, --help            show this help message and exit
   -n NAMESPACE, --namespace NAMESPACE
                         hero quest namespace (default: random)
-  -c COLOR, --color COLOR
-                        hero quest color as: Hue (number), Saturation (percent)  (default: 180, 30%)
   -p, --preview         show links tree in a preview.png file
   -d, --dry             do not compute links
   --output OUTPUT       create a z-app linker file
   --force FORCE         force computation even with errors
 
-Markdown syntax uses extensions defined in https://python-markdown.github.io/extensions/ and https://facelessuser.github.io/pymdown-extensions/
+Markdown syntax uses extensions defined in https://python-markdown.github.io/extensions/ and https://facelessuser.github.io/pymdown-extensions/ 
 Active extensions:
 * markdown.extensions.attr_list
 * markdown.extensions.def_list

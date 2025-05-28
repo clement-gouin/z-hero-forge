@@ -22,11 +22,14 @@ Click the button below to start the demo
 
 Hope you enjoyed this little demo !
 
-See:
+<!-- you can use admonitions like these (see https://facelessuser.github.io/pymdown-extensions/extensions/blocks/plugins/admonition/) -->
+/// note | See more:
 
-<!-- you can still make bullet list by adding an offset -->
+<!-- you can still make bullet list by using dash -->
 - Web-based adventure app: [z-hero-quest](https://github.com/clement-gouin/z-hero-quest/) (Github repository)
 - Markdown to app converter: [z-hero-forge](https://github.com/clement-gouin/z-hero-forge/) (Github repository)
+
+///
 
 <!-- so you can play again -->
 /set steps=110

@@ -5,6 +5,8 @@
 
 /show steps,footprints,110
 
+/color 216.49,85.06%
+
 <!-- these actions will be applied to all scenes as it is on the main content -->
 * <i icon=trees></i> Go back into the forest (-10 <i icon=footprints></i>)
   * [[forest]]
