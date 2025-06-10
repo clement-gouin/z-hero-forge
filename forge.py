@@ -42,7 +42,7 @@ MARKDOWN_EXTENSIONS = [
 
 
 def escape_name(name: str) -> str:
-    return re.sub(r"[^\w\.\-#]", "", name.replace(" ", "_"))
+    return re.sub(r"[^\w\.\-#]", "", name.replace(" ", "_")).lower()
 
 
 def random_str(size: int) -> str:
@@ -90,10 +90,10 @@ class SubScene:
                 action_raw = line[2:]
             elif (
                 action_raw is not None
-                and (match := re.match(r"\* \[\[([\w\-\#\.]*)\]\]", line.strip()))
+                and (match := re.match(r"\* *\[\[([^\]]*)\]\]", line.strip()))
                 is not None
             ):
-                raw_subscene_name = match.group(1)
+                raw_subscene_name = escape_name(match.group(1))
                 if raw_subscene_name == "":
                     self.actions += [(action_raw, self.full_name)]
                 elif raw_subscene_name == "#":
@@ -110,7 +110,7 @@ class SubScene:
                     self.actions += [(action_raw, None)]
                     action_raw = None
                     print(
-                        f"WARN: action without link '{action_raw}' / '{line.strip()}'",
+                        f"WARN: ({self}) action without link '{action_raw}' / '{line.strip()}'",
                         file=sys.stderr,
                     )
                     self.has_error = True
@@ -367,8 +367,9 @@ def __main():
     )
     parser.add_argument(
         "--force",
+        action="store_true",
         help="force computation even with errors",
-        default=None,
+        default=False,
     )
     args = parser.parse_args()
 
