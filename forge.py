@@ -84,7 +84,9 @@ class SubScene:
                 elif cmd.lower() == "/color":
                     self.color = " ".join(args)
                 else:
-                    print(f"WARN: invalid command '{line}'", file=sys.stderr)
+                    print(
+                        f"WARN: invalid command '{line}' at '{self}'", file=sys.stderr
+                    )
                     self.has_error = True
             elif line.startswith("*"):
                 action_raw = line[2:]
@@ -108,11 +110,11 @@ class SubScene:
             else:
                 if action_raw is not None:
                     self.actions += [(action_raw, None)]
-                    action_raw = None
                     print(
-                        f"WARN: ({self}) action without link '{action_raw}' / '{line.strip()}'",
+                        f"WARN: action '{action_raw}' has invalid link: '{line.strip().strip('*').strip()}' at '{self}'",
                         file=sys.stderr,
                     )
+                    action_raw = None
                     self.has_error = True
                 self.raw_content += [line]
         if action_raw is not None:
@@ -128,7 +130,7 @@ class SubScene:
                         self.actions[i] = (action_raw, other_subscene_name)
                         break
                 else:
-                    print(f"WARN: ({self}) subscene not found '{subscene_name}'")
+                    print(f"WARN: subscene not found '{subscene_name}' at '{self}'")
                     self.has_error = True
                     self.actions[i] = (action_raw, None)
 
