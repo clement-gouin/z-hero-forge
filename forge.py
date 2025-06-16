@@ -41,6 +41,40 @@ MARKDOWN_EXTENSIONS = [
 ]
 
 
+class Color:
+    R = "\033[0m"
+    B = "\033[1m"
+    U = "\033[4m"
+    I = "\033[3m"
+    FAIL = "\033[31m"
+    WARN = "\033[33m"
+    INFO = "\033[34m"
+    TEXT = "\033[37m"
+    LINK = "\033[36m"
+
+    FAIL_HEADER = f"{FAIL}{B}FAIL:{R}{FAIL}"
+    WARN_HEADER = f"{WARN}{B}WARN:{R}{WARN}"
+    INFO_HEADER = f"{INFO}{B}INFO:{R}{INFO}"
+
+    @classmethod
+    def colorize(cls, text: str) -> str:
+        reset = cls.R
+        if text.startswith("WARN:"):
+            reset += cls.WARN
+            text = cls.WARN_HEADER + text[5:] + cls.R
+        elif text.startswith("FAIL:"):
+            reset += cls.FAIL
+            text = cls.FAIL_HEADER + text[5:] + cls.R
+        elif text.startswith("INFO:"):
+            reset += cls.INFO
+            text = cls.INFO_HEADER + text[5:] + cls.R
+        for match in re.findall(r"('[^']+')", text):
+            text = text.replace(match, f"{cls.R}{cls.TEXT}{match[1:-1]}{reset}")
+        for match in re.findall(r"(@[^@]+@)", text):
+            text = text.replace(match, f"{cls.R}{cls.U}{cls.LINK}{match[1:-1]}{reset}")
+        return text
+
+
 def escape_name(name: str) -> str:
     return re.sub(r"[^\w\.\-#]", "", name.replace(" ", "_")).lower()
 
@@ -82,10 +116,20 @@ class SubScene:
                 elif cmd.lower() == "/show":
                     self.show += [" ".join(args)]
                 elif cmd.lower() == "/color":
-                    self.color = " ".join(args)
+                    color = " ".join(args)
+                    if re.match(r"^\d+\.?\d*, *\d+\.?\d*%$", color):
+                        self.color = color
+                    else:
+                        print(
+                            Color.colorize(
+                                f"WARN: invalid color '{line}' (must be hue, saturation like '180, 30%') at @{self}@"
+                            ),
+                            file=sys.stderr,
+                        )
                 else:
                     print(
-                        f"WARN: invalid command '{line}' at '{self}'", file=sys.stderr
+                        Color.colorize(f"WARN: invalid command '{line}' at @{self}@"),
+                        file=sys.stderr,
                     )
                     self.has_error = True
             elif line.startswith("*"):
@@ -111,7 +155,9 @@ class SubScene:
                 if action_raw is not None:
                     self.actions += [(action_raw, None)]
                     print(
-                        f"WARN: action '{action_raw}' has invalid link: '{line.strip().strip('*').strip()}' at '{self}'",
+                        Color.colorize(
+                            f"WARN: action '{action_raw.replace("'",'"')}' has invalid link: '{line.strip().strip('*').strip().replace("'",'"')}' at @{self}@"
+                        ),
                         file=sys.stderr,
                     )
                     action_raw = None
@@ -130,7 +176,12 @@ class SubScene:
                         self.actions[i] = (action_raw, other_subscene_name)
                         break
                 else:
-                    print(f"WARN: subscene not found '{subscene_name}' at '{self}'")
+                    print(
+                        Color.colorize(
+                            f"WARN: subscene not found '{subscene_name}' at @{self}@"
+                        ),
+                        file=sys.stderr,
+                    )
                     self.has_error = True
                     self.actions[i] = (action_raw, None)
 
@@ -155,12 +206,6 @@ class SubScene:
         ).replace("\n", "")
         z_data = [header, namespace]
         if self.color is not None:
-            if not re.match(r"^\d+\.?\d*, *\d+\.?\d*%$", self.color):
-                print(
-                    f"ERROR: invalid color '{self.color}' (must be hue, saturation like '180, 30%')",
-                    file=sys.stderr,
-                )
-                sys.exit(1)
             z_data += [self.color]
         z_data += [
             str(len(self.show)),
@@ -277,10 +322,12 @@ def get_md_files(dir: str) -> list[str]:
             if os.path.isfile(path) and file.endswith(".md"):
                 files += [path]
     except:
-        print(f"ERROR: Cannot read directory '{dir}'", file=sys.stderr)
+        print(Color.colorize(f"FAIL: Cannot read directory @{dir}@"), file=sys.stderr)
         sys.exit(1)
     if len(files) == 0:
-        print(f"ERROR: No markdown files found in '{dir}'", file=sys.stderr)
+        print(
+            Color.colorize(f"FAIL: No markdown files found in @{dir}@"), file=sys.stderr
+        )
         sys.exit(1)
     return sorted(files)
 
@@ -290,11 +337,14 @@ def parse_scene_file(path: str) -> Scene:
         with open(path) as file:
             raw_content = file.readlines()
             if len(raw_content) == 0:
-                print(f"ERROR: Empty scene file '{path}'", file=sys.stderr)
+                print(
+                    Color.colorize(f"FAIL: Empty scene file at @{path}@"),
+                    file=sys.stderr,
+                )
                 sys.exit(1)
             return Scene(path).parse(raw_content)
     except OSError:
-        print(f"ERROR: Cannot read '{path}'", file=sys.stderr)
+        print(Color.colorize(f"FAIL: Cannot read @{path}@"), file=sys.stderr)
         sys.exit(1)
 
 
@@ -306,7 +356,7 @@ def link_scenes(scenes: list["Scene"]) -> None:
     for scene in scenes:
         for subscene in scene.subscenes:
             subscene.link_scenes(subscenes)
-    print(f"INFO: linked {len(subscenes)} subscenes")
+    print(Color.colorize(f"INFO: linked {len(subscenes)} subscenes"))
 
 
 def count_errors(scenes: list["Scene"]) -> int:
@@ -328,7 +378,7 @@ def make_linker_output(apps: list[linker.Link], path: str) -> None:
     with open(path, mode="w") as file:
         for app in apps:
             file.write(separator + " " + app.link_name + "\n" + app.data + "\n")
-    print(f"INFO: generated z-app linker file at '{path}'")
+    print(Color.colorize(f"INFO: generated z-app linker file at @{path}@"))
 
 
 def __main():
@@ -379,16 +429,16 @@ def __main():
 
     scenes = [parse_scene_file(path) for path in files]
 
-    print(f"INFO: parsed {len(scenes)} scenes")
+    print(Color.colorize(f"INFO: parsed {len(scenes)} scenes"))
 
     link_scenes(scenes)
 
     errors = count_errors(scenes)
 
     if errors > 0:
-        print(f"WARN: {errors} errors found", file=sys.stderr)
+        print(Color.colorize(f"WARN: {errors} errors found"), file=sys.stderr)
         if not args.force:
-            print(f"(pass --force to continue)", file=sys.stderr)
+            print(Color.colorize(f"WARN: (pass --force to continue)"), file=sys.stderr)
             sys.exit(1)
 
     namespace = args.namespace if args.namespace is not None else random_str(10)
@@ -401,7 +451,7 @@ def __main():
         make_linker_output(apps, args.output)
 
     if args.preview:
-        print(f"INFO: generating preview for {len(apps)} elements...")
+        print(Color.colorize(f"INFO: generating preview for {len(apps)} elements..."))
         linker.Preview(apps).compute()
 
     if not args.dry:
