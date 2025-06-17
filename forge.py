@@ -156,7 +156,7 @@ class SubScene:
                     self.actions += [(action_raw, None)]
                     print(
                         Color.colorize(
-                            f"WARN: action '{action_raw.replace("'",'"')}' has invalid link: '{line.strip().strip('*').strip().replace("'",'"')}' at @{self}@"
+                            f"WARN: action '{action_raw.replace("'",'"')}' has invalid link: '{line.strip().strip('*').strip()}' at @{self}@"
                         ),
                         file=sys.stderr,
                     )
