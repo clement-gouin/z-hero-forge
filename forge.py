@@ -48,7 +48,7 @@ class Color:
     I = "\033[3m"
     FAIL = "\033[31m"
     WARN = "\033[33m"
-    INFO = "\033[34m"
+    INFO = "\033[32m"
     TEXT = "\033[37m"
     LINK = "\033[36m"
 
