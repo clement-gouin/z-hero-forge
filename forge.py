@@ -172,7 +172,11 @@ class SubScene:
             action_raw, subscene_name = action_data
             if subscene_name is not None and subscene_name not in subscenes:
                 for other_subscene_name in subscenes:
-                    if other_subscene_name.startswith(subscene_name):
+                    if other_subscene_name.startswith(
+                        subscene_name + "#"
+                        if "#" not in subscene_name
+                        else subscene_name
+                    ):
                         self.actions[i] = (action_raw, other_subscene_name)
                         break
                 else:
@@ -220,6 +224,8 @@ class SubScene:
             with_invert = False
             for match in re.findall(r"[\[\{][^\]\}]+[\]\}]", action_raw):
                 condition = match[1:-1]
+                if condition.startswith("{"):
+                    continue
                 if re.match(r"^\d+\.?\d*%$", condition):
                     if rand_var is None:
                         rand_var = "rand_" + random_str(4).lower()
