@@ -249,9 +249,7 @@ class SubScene:
             if subscene_name is None:
                 html_content = html_content_disabled
             else:
-                html_content = (
-                    f'<a class=button href="{subscene_name}">{button_title}</a>'
-                )
+                html_content = f'<a class=button href="{subscene_name}-{hash(subscene_name)}">{button_title}</a>'
             if len(full_condition):
                 z_data_actions += ["&&".join(full_condition), html_content]
             else:
@@ -268,7 +266,9 @@ class SubScene:
         return "\n".join(z_data)
 
     def get_app(self, **kwargs) -> linker.Link:
-        return linker.Link(APP, self.full_name, self.get_z_data(**kwargs))
+        return linker.Link(
+            APP, f"{self.full_name}-{hash(self.full_name)}", self.get_z_data(**kwargs)
+        )
 
 
 class Scene:
