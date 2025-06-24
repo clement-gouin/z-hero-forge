@@ -132,11 +132,11 @@ class SubScene:
                         file=sys.stderr,
                     )
                     self.has_error = True
-            elif line.startswith("*"):
+            elif line.startswith("* "):
                 action_raw = line[2:]
             elif (
                 action_raw is not None
-                and (match := re.match(r"\* *\[\[([^\]]*)\]\]", line.strip()))
+                and (match := re.match(r"\* +\[\[([^\]]*)\]\]", line.strip()))
                 is not None
             ):
                 raw_subscene_name = escape_name(match.group(1))
