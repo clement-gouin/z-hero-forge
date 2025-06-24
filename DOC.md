@@ -7,6 +7,9 @@ See [README.txt](./README.txt) for CLI arguments.
 - [Basics](#basics)
 - [Scenes / Subscenes](#scenes--subscenes)
 - [Actions](#actions)
+  - [Conditions](#conditions)
+    - [Random encounters](#random-encounters)
+  - [Targets](#targets)
 - [Commands](#commands)
   - [`/include path_1 path_2 ...`](#include-path_1-path_2-)
   - [`/show var, icon, default`](#show-var-icon-default)
@@ -16,6 +19,7 @@ See [README.txt](./README.txt) for CLI arguments.
   - [`/color hue, saturation`](#color-hue-saturation)
 - [Comments](#comments)
 - [Markdown / HTML](#markdown--html)
+  - [Runtime content](#runtime-content)
   - [Icons](#icons)
   - [Colors](#colors)
   - [Level 2 title (bypass default behavior)](#level-2-title-bypass-default-behavior)
@@ -112,11 +116,58 @@ Hello there!
 This is not the default
 ```
 
-
-
 ## Actions
 
-TODO
+Actions are defined with 3 things:
+* Conditions
+* Text
+* Target
+
+```markdown
+* Text and conditions
+  * [[target]]
+```
+
+### Conditions
+
+Conditions are Javascript and evaluated at runtime.
+
+There are 2 types of conditions:
+* visible `[condition]`
+* hidden `{condition}`
+
+```markdown
+<!-- Will always display "[VAR1 > 0] Action" and will be disabled if not true -->
+* [VAR1 > 0] Action
+  * [[target]]
+<!-- Will display only if true with the text "Action"-->
+* {VAR2 > 0} Action
+  * [[target]]
+```
+
+#### Random encounters
+
+You can use `[x%]` or `{x%}` syntax to generate random encounters.
+
+```markdown
+* {10%} Action 1
+  * [[target]]
+* {30%} Action 2
+  * [[target]]
+* Action 3
+  * [[target]]
+<!-- Action 1 and 2 will never appear together, action 3 will always be available -->
+```
+
+### Targets
+
+There are 5 types of targets:
+* No target (no line at all): action will always be disabled
+* `[[]]`: links to the same subscene
+* `[[#]]`: links to the first subscene (default) of this scene 
+* `[[#name]]`: links to the subscene `name` of this scene
+* `[[name]]`: links to the first subscene (default) of the scene `name`
+* `[[name#subname]]`: links to the subscene `subname` of the scene `name`
 
 ## Commands
 
@@ -265,6 +316,10 @@ Normal text
 ```
 
 Some extensions are provided by [z-hero-quest](https://github.com/clement-gouin/z-hero-quest/), [python-markdown](https://python-markdown.github.io/extensions/) and [pymdown-extensions](https://facelessuser.github.io/pymdown-extensions/).
+
+### Runtime content
+
+TODO
 
 ### Icons
 
