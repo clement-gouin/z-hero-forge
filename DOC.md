@@ -172,10 +172,10 @@ See [Material colors](https://materialui.co/colors/)
 
 ```markdown
 <!-- standard text color -->
-This is <span class=red>red</span
+This is <span class=red>red</span>
 
 <!-- specific text color -->
-This is <span class=red-600>red</span
+This is <span class=red-600>red</span>
 
 <!-- background color -->
 <div class=bg-red-300>This is red background</div>
