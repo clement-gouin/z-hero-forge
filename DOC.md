@@ -149,7 +149,7 @@ Normal text
 [link](url)
 ```
 
-Some extensions are provided by [python-markdown](https://python-markdown.github.io/extensions/) and [pymdown-extensions](https://facelessuser.github.io/pymdown-extensions/).
+Some extensions are provided by [z-hero-quest](https://github.com/clement-gouin/z-hero-quest/), [python-markdown](https://python-markdown.github.io/extensions/) and [pymdown-extensions](https://facelessuser.github.io/pymdown-extensions/).
 
 ### Icons
 
