@@ -1,10 +1,10 @@
 # [Z] Hero Forge Documentation
 
+`forge.py` compute markdown files in the specified directory (not sub-directories) into [z-hero-quest](https://github.com/clement-gouin/z-hero-quest/) playable links (using [z-app-linker](https://github.com/clement-gouin/z-app-linker/)).
+
 See [README.txt](./README.txt) for CLI arguments.
 
 ## Basics
-
-`forge.py` compute markdown files in the specified directory (not sub-directories) into [z-hero-quest](https://github.com/clement-gouin/z-hero-quest/) playable links (using [z-app-linker](https://github.com/clement-gouin/z-app-linker/)).
 
 Each file is called a **scene** and can have **sub-scenes**.
 
