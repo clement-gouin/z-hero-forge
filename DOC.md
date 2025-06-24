@@ -180,7 +180,7 @@ This is <span class=red-600>red</span>
 <!-- background color -->
 <div class=bg-red-300>This is red background</div>
 
-<!-- apply color to button (background/foreground/hover) -->
+<!-- apply color to button with #color-name (background/foreground/hover) -->
 * This is red #red
 ```
 
