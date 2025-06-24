@@ -57,7 +57,62 @@ Click the <b>button</b> below to start the *demo*
 
 ## Scenes / Subscenes
 
-TODO
+* **Scenes** are defined by a markdown file
+  * The scene key is the filename lowercased and spaces replaced by `_`
+* **Subscenes** are defined in the scene file with level 2 headings
+  * The subscene key is alsow lowercased and spaces replaced by `_`
+* The first subscene defined is the default one (can be referred as `#`)
+  * If none are defined, the scene has a `default` subscene.
+* Every content placed before the first subscene is applied to **all subscenes** (Even actions and commands)
+
+```markdown
+<!-- main.md, key: main -->
+
+<!-- this content is applied to all scenes -->
+Hello there!
+/set myvar = 0
+
+* This is some action
+  * [[#key-1]]
+
+<!-- first subscene (default), key: main#key-1 -->
+## key-1
+
+This is the default
+
+<!-- second subscene, key: main#key-2 -->
+## key-2
+
+This is not the default
+```
+
+The content before the first subscene will be translated as:
+
+```markdown
+<!-- main.md -->
+
+## key-1
+
+Hello there!
+/set myvar = 0
+
+* This is some action
+  * [[#key-1]]
+
+This is the default
+
+## key-2
+
+Hello there!
+/set myvar = 0
+
+* This is some action
+  * [[#key-1]]
+
+This is not the default
+```
+
+
 
 ## Actions
 
