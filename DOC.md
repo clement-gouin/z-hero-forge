@@ -16,13 +16,15 @@ See [README.txt](./README.txt) for CLI arguments.
   - [`/color`](#color)
 - [Comments](#comments)
 - [Markdown / HTML](#markdown--html)
+  - [Icons](#icons)
+  - [Colors](#colors)
   - [Level 2 title (bypass default behavior)](#level-2-title-bypass-default-behavior)
   - [Lists (bypass default behavior)](#lists-bypass-default-behavior)
   - [Admonitions](#admonitions)
   - [Emojis](#emojis)
   - [Mark](#mark)
   - [Progress bar](#progress-bar)
-  - [Quotes](#quotes)
+  - [Relative image](#relative-image)
   - [Tables](#tables)
 
 
@@ -121,9 +123,66 @@ Click the <b>button</b> below to start the *demo*
 
 ## Markdown / HTML
 
-Classic markdown syntax is allowed (see lists for )
+Classic markdown syntax is allowed.
+
+```markdown
+# level 1 title
+### level 3 title
+#### level 4 title
+##### level 5 title
+
+Normal text
+
+*italic text*
+
+**bold text**
+
+`inline code`
+
+> quote
+
+<!-- horizontal line -->
+---
+
+![image](url)
+
+[link](url)
+```
 
 Some extensions are provided by [python-markdown](https://python-markdown.github.io/extensions/) and [pymdown-extensions](https://facelessuser.github.io/pymdown-extensions/).
+
+### Icons
+
+See [Lucide icons](https://lucide.dev/icons/)
+
+```markdown
+<!-- title text icon -->
+# <i icon=house></i> This is my house
+
+<!-- standard text icon -->
+<i icon=house></i> This is my house
+
+<!-- button text icon -->
+* <i icon=house></i> This is my house
+```
+
+### Colors
+
+See [Material colors](https://materialui.co/colors/)
+
+```markdown
+<!-- standard text color -->
+This is <span class=red>red</span
+
+<!-- specific text color -->
+This is <span class=red-600>red</span
+
+<!-- background color -->
+<div class=bg-red-300>This is red background</div>
+
+<!-- apply color to button (background/foreground/hover) -->
+* This is red #red
+```
 
 ### Level 2 title (bypass default behavior)
 
@@ -131,7 +190,7 @@ Some extensions are provided by [python-markdown](https://python-markdown.github
 <!-- subscene key -->
 ## default
 
-<!-- level 2 title -->
+<!-- normal level 2 title -->
 <h2>default</h2>
 ```
 
@@ -142,7 +201,7 @@ Some extensions are provided by [python-markdown](https://python-markdown.github
 * Start
   * [[forest]]
 
-<!-- list -->
+<!-- normal markdown list -->
 - Start
   - forest
 ```
@@ -152,6 +211,7 @@ Some extensions are provided by [python-markdown](https://python-markdown.github
 See [documentation](https://facelessuser.github.io/pymdown-extensions/extensions/blocks/plugins/admonition/)
 
 ```markdown
+<!-- will be converted to admonition blocks -->
 /// note | Some title (note)
 
 Some content
@@ -178,6 +238,7 @@ Some content
 See [documentation](https://facelessuser.github.io/pymdown-extensions/extensions/emoji/)
 
 ```markdown
+<!-- will be converted to image emojis -->
 :smile: :heart: :thumbsup:
 ```
 
@@ -186,6 +247,7 @@ See [documentation](https://facelessuser.github.io/pymdown-extensions/extensions
 See [documentation](https://facelessuser.github.io/pymdown-extensions/extensions/mark/)
 
 ```markdown
+<!-- will be highlighted -->
 ==mark me==
 
 ==smart==mark==
@@ -205,19 +267,24 @@ See [documentation](https://facelessuser.github.io/pymdown-extensions/extensions
 [=100% "100%"]
 ```
 
-### Quotes
+### Relative image
+
+See [documentation](https://facelessuser.github.io/pymdown-extensions/extensions/b64/)
 
 ```markdown
-> quoted content
+<!-- will be converted to base64 image (no link) -->
+![](./path/to/image)
 ```
 
 ### Tables
 
 See [documentation](https://python-markdown.github.io/extensions/tables/)
 
-```txt
+```markdown
+<!-- will be converted to HTML table -->
 First Header  | Second Header
 ------------- | -------------
 Content Cell  | Content Cell
 Content Cell  | Content Cell
 ```
+
