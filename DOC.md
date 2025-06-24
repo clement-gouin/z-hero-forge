@@ -319,7 +319,21 @@ Some extensions are provided by [z-hero-quest](https://github.com/clement-gouin/
 
 ### Runtime content
 
-TODO
+```markdown
+/set VAR = Math.random()
+
+The content of the variable is {{VAR}}.
+
+{{VAR > 0.5 ? 'It is over 50%': 'It is under 50%'}}
+
+<!-- runtime content can be applied to actions -->
+
+/set price = 50
+/set offer = 0.2
+
+* My action at price: {{Math.round(price * (1 - offer))}}
+  * [[target]]
+```
 
 ### Icons
 
