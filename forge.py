@@ -254,7 +254,8 @@ class SubScene:
             if subscene_name is None:
                 html_content = html_content_disabled
             else:
-                html_content = f'<a class="{" ".join(classes)}" href="{subscene_name}-{len(subscene_name)}">{button_title}</a>'
+                classes_str = " ".join(classes)
+                html_content = f'<a class="{classes_str}" href="{subscene_name}-{len(subscene_name)}">{button_title}</a>'
             if len(full_condition):
                 z_data_actions += ["&&".join(full_condition), html_content]
             else:
