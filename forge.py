@@ -278,18 +278,31 @@ class Scene:
         self.subscenes: list[SubScene] = []
 
     def __repr__(self):
-        return f"{self.name} (#{len(self.subscenes)})"
+        return self.name
 
     def parse(self, lines: list[str]) -> "Scene":
         scene_data = []
         subscene_data = []
         subscene_name = None
-        for line in lines:
-            line = line.replace("\n", "")
+        i = -1
+        while i + 1 < len(lines):
+            i += 1
+            line = lines[i].replace("\n", "")
             line_escaped = re.sub("<!--.*-->", "", line)
             if len(line) and not len(line_escaped.strip()):
                 continue
             line = line_escaped
+            if re.match(r"^/include", line):
+                _, *args = line.split(" ")
+                new_lines = []
+                for arg in args:
+                    include_path = os.path.realpath(
+                        os.path.join(os.path.dirname(self.path), arg)
+                    )
+                    new_lines += get_file_content(include_path)
+                lines = lines[:i] + new_lines + lines[i + 1 :]
+                i -= 1
+                continue
             if re.match(r"#{2}[^#]+", line):
                 if subscene_name is not None:
                     self.subscenes += [
@@ -338,20 +351,24 @@ def get_md_files(dir: str) -> list[str]:
     return sorted(files)
 
 
-def parse_scene_file(path: str) -> Scene:
+def get_file_content(path: str) -> list[str]:
     try:
         with open(path) as file:
             raw_content = file.readlines()
             if len(raw_content) == 0:
                 print(
-                    Color.colorize(f"FAIL: Empty scene file at @{path}@"),
+                    Color.colorize(f"FAIL: Empty file at @{path}@"),
                     file=sys.stderr,
                 )
                 sys.exit(1)
-            return Scene(path).parse(raw_content)
+            return raw_content
     except OSError:
         print(Color.colorize(f"FAIL: Cannot read @{path}@"), file=sys.stderr)
         sys.exit(1)
+
+
+def parse_scene_file(path: str) -> Scene:
+    return Scene(path).parse(get_file_content(path))
 
 
 def link_scenes(scenes: list["Scene"]) -> None:
