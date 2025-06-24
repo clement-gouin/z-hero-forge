@@ -12,3 +12,4 @@ preview.png
 !sample/*.md
 .obsidian
 !DOC.md
+*.csv

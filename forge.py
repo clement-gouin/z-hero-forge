@@ -254,7 +254,7 @@ class SubScene:
             if subscene_name is None:
                 html_content = html_content_disabled
             else:
-                html_content = f'<a class="{' '.join(classes)}" href="{subscene_name}-{hash(subscene_name)}">{button_title}</a>'
+                html_content = f'<a class="{' '.join(classes)}" href="{subscene_name}-{len(subscene_name)}">{button_title}</a>'
             if len(full_condition):
                 z_data_actions += ["&&".join(full_condition), html_content]
             else:
@@ -272,7 +272,7 @@ class SubScene:
 
     def get_app(self, **kwargs) -> linker.Link:
         return linker.Link(
-            APP, f"{self.full_name}-{hash(self.full_name)}", self.get_z_data(**kwargs)
+            APP, f"{self.full_name}-{len(self.full_name)}", self.get_z_data(**kwargs)
         )
 
 
@@ -416,13 +416,39 @@ def scenes_to_apps(scenes: list["Scene"], **kwargs) -> list[linker.Link]:
     return apps
 
 
-def make_linker_output(apps: list[linker.Link], path: str) -> None:
-    path = os.path.abspath(path)
+def make_linker_output(apps: list[linker.Link], dir_path: str) -> None:
+    path = os.path.abspath(dir_path + ".txt")
     separator = linker.APPS[APP][0] * 5
     with open(path, mode="w") as file:
         for app in apps:
             file.write(separator + " " + app.link_name + "\n" + app.data + "\n")
     print(Color.colorize(f"INFO: generated z-app linker file at @{path}@"))
+
+
+def add_links_to_apps(apps: list[linker.Link], dir_path: str) -> None:
+    name = os.path.abspath(dir_path + ".csv")
+    apps_dict = {app.link_name: app for app in apps}
+    if os.path.exists(name):
+        found = 0
+        with open(name) as file:
+            file.readline()  # ignore headers
+            for line in file:
+                link_name, link = line.strip().split(",")[:2]
+                if link_name in apps_dict:
+                    apps_dict[link_name].link = link
+                    found += 1
+        print(Color.colorize(f"INFO: found {found} matching links in @{name}@"))
+    else:
+        print(Color.colorize(f"WARN: no links file found at @{name}@"))
+
+
+def save_apps_links(apps: list[linker.Link], dir_path: str) -> None:
+    name = os.path.abspath(dir_path + ".csv")
+    with open(name, mode="w") as file:
+        file.write("link_name,link\n")
+        for app in apps:
+            file.write(f"{app.link_name},{app.link}\n")
+    print(Color.colorize(f"INFO: generated links file @{name}@"))
 
 
 def __main():
@@ -457,11 +483,6 @@ def __main():
         default=False,
     )
     parser.add_argument(
-        "--output",
-        help="create a z-app linker file",
-        default=None,
-    )
-    parser.add_argument(
         "--force",
         action="store_true",
         help="force computation even with errors",
@@ -491,15 +512,18 @@ def __main():
 
     linker.link_all_apps(apps)
 
-    if args.output:
-        make_linker_output(apps, args.output)
+    make_linker_output(apps, args.dir_path)
 
     if args.preview:
         print(Color.colorize(f"INFO: generating preview for {len(apps)} elements..."))
         linker.Preview(apps).compute()
 
     if not args.dry:
-        linker.resolve_all_apps(apps)
+        add_links_to_apps(apps, args.dir_path)
+
+        linker.resolve_all_apps(apps, quiet=True)
+
+        save_apps_links(apps, args.dir_path)
 
 
 if __name__ == "__main__":
