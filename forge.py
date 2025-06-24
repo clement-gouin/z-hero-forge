@@ -289,25 +289,12 @@ class Scene:
         scene_data = []
         subscene_data = []
         subscene_name = None
-        i = -1
-        while i + 1 < len(lines):
-            i += 1
-            line = lines[i].replace("\n", "")
+        for line in lines:
+            line = line.replace("\n", "")
             line_escaped = re.sub("<!--.*-->", "", line)
             if len(line) and not len(line_escaped.strip()):
                 continue
             line = line_escaped
-            if line.startswith("/include"):
-                _, *args = line.split(" ")
-                new_lines = []
-                for arg in args:
-                    include_path = os.path.realpath(
-                        os.path.join(os.path.dirname(self.path), arg)
-                    )
-                    new_lines += get_file_content(include_path)
-                lines = lines[:i] + new_lines + lines[i + 1 :]
-                i -= 1
-                continue
             if re.match(r"#{2}[^#]+", line):
                 if subscene_name is not None:
                     self.subscenes += [
@@ -356,7 +343,9 @@ def get_md_files(dir: str) -> list[str]:
     return sorted(files)
 
 
-def get_file_content(path: str) -> list[str]:
+def get_file_content(path: str, seen: list[str] = []) -> list[str] | None:
+    if path in seen:
+        return None
     try:
         with open(path) as file:
             raw_content = file.readlines()
@@ -366,6 +355,29 @@ def get_file_content(path: str) -> list[str]:
                     file=sys.stderr,
                 )
                 sys.exit(1)
+            i = 0
+            while i < len(raw_content):
+                line = raw_content[i].replace("\n", "")
+                if line.startswith("/include"):
+                    _, *args = line.split(" ")
+                    new_lines = []
+                    for arg in args:
+                        include_path = os.path.realpath(
+                            os.path.join(os.path.dirname(path), arg)
+                        )
+                        new_content = get_file_content(include_path, seen + [path])
+                        if new_content is None:
+                            print(
+                                Color.colorize(
+                                    f"FAIL: Circular dependency '{line}' at @{path}@"
+                                ),
+                                file=sys.stderr,
+                            )
+                            return None
+                        new_lines += new_content
+                    raw_content = raw_content[:i] + new_lines + raw_content[i + 1 :]
+                else:
+                    i += 1
             return raw_content
     except OSError:
         print(Color.colorize(f"FAIL: Cannot read @{path}@"), file=sys.stderr)
@@ -373,7 +385,11 @@ def get_file_content(path: str) -> list[str]:
 
 
 def parse_scene_file(path: str) -> Scene:
-    return Scene(path).parse(get_file_content(path))
+    raw_content = get_file_content(path)
+    if raw_content is None:
+        print(Color.colorize(f"FAIL: Cannot read @{path}@"), file=sys.stderr)
+        sys.exit(1)
+    return Scene(path).parse(raw_content)
 
 
 def link_scenes(scenes: list["Scene"]) -> None:
