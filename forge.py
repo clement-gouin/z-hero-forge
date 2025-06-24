@@ -243,13 +243,18 @@ class SubScene:
                     button_title = button_title.replace(match, "")
                 else:
                     with_invert = True
+            classes = []
+            classes = ["button"]
+            for match in re.findall(r"\#[\w-]+", button_title):
+                classes += [match[1:]]
+                button_title = button_title.replace(match, "")
             html_content_disabled = (
                 f'<span class="button disabled">{button_title}</span>'
             )
             if subscene_name is None:
                 html_content = html_content_disabled
             else:
-                html_content = f'<a class=button href="{subscene_name}-{hash(subscene_name)}">{button_title}</a>'
+                html_content = f'<a class="{' '.join(classes)}" href="{subscene_name}-{hash(subscene_name)}">{button_title}</a>'
             if len(full_condition):
                 z_data_actions += ["&&".join(full_condition), html_content]
             else:
