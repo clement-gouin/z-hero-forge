@@ -121,7 +121,7 @@ Variable Name = Value change (js)
 
 Sample:
 ```markdown
-/set strength=strength + 1
+/set strength=strength+1
 /set health=Math.max(health-20,0)
 ```
 
