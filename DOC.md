@@ -8,12 +8,12 @@ See [README.txt](./README.txt) for CLI arguments.
 - [Scenes / Subscenes](#scenes--subscenes)
 - [Actions](#actions)
 - [Commands](#commands)
-  - [`/include`](#include)
-  - [`/show`](#show)
-  - [`/set`](#set)
-  - [`/start`](#start)
-  - [`/end`](#end)
-  - [`/color`](#color)
+  - [`/include path_1 path_2 ...`](#include-path_1-path_2-)
+  - [`/show var, icon, default`](#show-var-icon-default)
+  - [`/set var = value`](#set-var--value)
+  - [`/start var`](#start-var)
+  - [`/end var`](#end-var)
+  - [`/color hue, saturation`](#color-hue-saturation)
 - [Comments](#comments)
 - [Markdown / HTML](#markdown--html)
   - [Icons](#icons)
@@ -65,29 +65,89 @@ TODO
 
 ## Commands
 
-### `/include`
+### `/include path_1 path_2 ...`
 
-TODO
+Replace the line with the content of specified files.
 
-### `/show`
+Before:
+```markdown
+<!-- main.md -->
+/include ./fragments/var1.md ./fragments/var2.md
 
-TODO
+<!-- fragments/var1.md -->
+/set var1 = 0
 
-### `/set`
+<!-- fragments/var2.md -->
+/set var2 = 0
+/include ./var3.md
 
-TODO
+<!-- fragments/var3.md -->
+/set var3 = 0
+```
 
-### `/start`
+After:
+```markdown
+<!-- main.md -->
+/set var1 = 0
+/set var2 = 0
+/set var3 = 0
+```
 
-TODO
+### `/show var, icon, default`
 
-### `/end`
+Display variable as icon and value in the final page.
 
-TODO
+Extracted from [z-hero-quest](https://github.com/clement-gouin/z-hero-quest/) documentation:
+```txt
+Variable Name, Lucide Icon, Default value (js, default to 0)
+```
 
-### `/color`
+Sample:
+```markdown
+/show health,heart,100
+/show strength,sword,13
+/show constitution,shield,13
+/show agility,target,13
+```
 
-TODO
+### `/set var = value`
+
+Update variable in the background in the final page.
+
+Extracted from [z-hero-quest](https://github.com/clement-gouin/z-hero-quest/) documentation:
+```txt
+Variable Name = Value change (js)
+```
+
+Sample:
+```markdown
+/set strength=strength + 1
+/set health=Math.max(health-20,0)
+```
+
+### `/start var`
+
+Shortand command for `/set var=1`
+
+### `/end var`
+
+Shortand command for `/set var=2`
+
+### `/color hue, saturation`
+
+Set final page color.
+
+Extracted from [z-hero-quest](https://github.com/clement-gouin/z-hero-quest/) documentation:
+```txt
+Hue, Saturation (optional, "180, 30%" by default)
+```
+
+Sample:
+```markdown
+/color 1.13,83.25%
+
+It's so hot in here
+```
 
 ## Comments
 
