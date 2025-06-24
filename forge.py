@@ -297,7 +297,7 @@ class Scene:
             if len(line) and not len(line_escaped.strip()):
                 continue
             line = line_escaped
-            if re.match(r"^/include", line):
+            if line.startswith("/include"):
                 _, *args = line.split(" ")
                 new_lines = []
                 for arg in args:
