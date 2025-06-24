@@ -11,3 +11,4 @@ preview.png
 *.md
 !sample/*.md
 .obsidian
+!DOC.md

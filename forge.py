@@ -411,7 +411,7 @@ def make_linker_output(apps: list[linker.Link], path: str) -> None:
 
 def __main():
     parser = argparse.ArgumentParser(
-        description="creates a z-hero-quest adventure from markdown data (see sample directory)",
+        description="creates a z-hero-quest adventure from markdown data (see sample directory or DOC.md)",
         formatter_class=argparse.RawTextHelpFormatter,
         epilog="Markdown syntax uses extensions defined in https://python-markdown.github.io/extensions/ and https://facelessuser.github.io/pymdown-extensions/ \nActive extensions:\n* "
         + "\n* ".join(MARKDOWN_EXTENSIONS),

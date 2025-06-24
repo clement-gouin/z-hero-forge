@@ -2,7 +2,7 @@ usage: forge.py [-h] [-n NAMESPACE] [-p] [-d] [--output OUTPUT]
                 [--force FORCE]
                 DIR
 
-creates a z-hero-quest adventure from markdown data (see sample directory)
+creates a z-hero-quest adventure from markdown data (see sample directory or DOC.md)
 
 positional arguments:
   DIR                   data file path (default: data.txt)
