@@ -17,6 +17,7 @@ See [README.txt](./README.txt) for CLI arguments.
   - [`/start var`](#start-var)
   - [`/end var`](#end-var)
   - [`/color hue, saturation`](#color-hue-saturation)
+  - [`/nopreview`](#nopreview)
 - [Comments](#comments)
 - [Markdown / HTML](#markdown--html)
   - [Runtime content](#runtime-content)
@@ -254,6 +255,10 @@ Sample:
 
 It's so hot in here
 ```
+
+### `/nopreview`
+
+Remove subscene from preview graph
 
 ## Comments
 

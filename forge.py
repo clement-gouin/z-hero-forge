@@ -94,6 +94,7 @@ class SubScene:
         self.show: list[str] = []
         self.color: str | None = None
         self.has_error = False
+        self.preview = True
 
     def __repr__(self):
         return self.full_name
@@ -126,6 +127,8 @@ class SubScene:
                             ),
                             file=sys.stderr,
                         )
+                elif cmd.lower() == "/nopreview":
+                    self.preview = False
                 else:
                     print(
                         Color.colorize(f"WARN: invalid command '{line}' at @{self}@"),
@@ -272,7 +275,10 @@ class SubScene:
 
     def get_app(self, **kwargs) -> linker.Link:
         return linker.Link(
-            APP, f"{self.full_name}-{len(self.full_name)}", self.get_z_data(**kwargs)
+            APP,
+            f"{self.full_name}-{len(self.full_name)}",
+            self.get_z_data(**kwargs),
+            preview=self.preview,
         )
 
 
@@ -417,7 +423,7 @@ def scenes_to_apps(scenes: list["Scene"], **kwargs) -> list[linker.Link]:
 
 
 def make_linker_output(apps: list[linker.Link], dir_path: str) -> None:
-    path = os.path.abspath(dir_path + ".txt")
+    path = os.path.realpath(os.path.abspath(dir_path)) + ".txt"
     separator = linker.APPS[APP][0] * 5
     with open(path, mode="w") as file:
         for app in apps:
@@ -426,7 +432,7 @@ def make_linker_output(apps: list[linker.Link], dir_path: str) -> None:
 
 
 def add_links_to_apps(apps: list[linker.Link], dir_path: str) -> None:
-    name = os.path.abspath(dir_path + ".csv")
+    name = os.path.realpath(os.path.abspath(dir_path)) + ".csv"
     apps_dict = {app.link_name: app for app in apps}
     if os.path.exists(name):
         found = 0
@@ -443,7 +449,7 @@ def add_links_to_apps(apps: list[linker.Link], dir_path: str) -> None:
 
 
 def save_apps_links(apps: list[linker.Link], dir_path: str) -> None:
-    name = os.path.abspath(dir_path + ".csv")
+    name = os.path.realpath(os.path.abspath(dir_path)) + ".csv"
     with open(name, mode="w") as file:
         file.write("link_name,link\n")
         for app in apps:
@@ -515,7 +521,11 @@ def __main():
     make_linker_output(apps, args.dir_path)
 
     if args.preview:
-        print(Color.colorize(f"INFO: generating preview for {len(apps)} elements..."))
+        print(
+            Color.colorize(
+                f"INFO: generating preview for {sum(app.preview for app in apps)} elements..."
+            )
+        )
         linker.Preview(apps).compute()
 
     if not args.dry:
