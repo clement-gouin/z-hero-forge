@@ -218,6 +218,7 @@ class SubScene:
             full_condition = []
             button_title = action_raw
             with_invert = False
+            invert_full_condition = []
             for match in re.findall(r"[\[\{][^\]\}]+[\]\}]", action_raw):
                 condition = match[1:-1]
                 if condition.startswith("{"):
@@ -227,18 +228,17 @@ class SubScene:
                         rand_var = "rand_" + random_str(4).lower()
                     percent_value = float(condition[:-1])
                     if percent_start == 0:
-                        full_condition += [f"({rand_var}<{percent_value})"]
+                        condition = f"({rand_var}<{percent_value})"
                     else:
-                        full_condition += [
-                            f"({rand_var}>{percent_start}&&{rand_var}<{percent_start+percent_value})"
-                        ]
+                        condition = f"({rand_var}>{percent_start}&&{rand_var}<{percent_start+percent_value})"
                     percent_start += percent_value
-                else:
-                    full_condition += [f"({condition})"]
+                full_condition += [condition]
                 if match.startswith("{"):
                     button_title = button_title.replace(match, "")
+                    invert_full_condition += [condition]
                 else:
                     with_invert = True
+                    invert_full_condition += [f"!({condition})"]
             classes = []
             classes = ["button"]
             for match in re.findall(r"\#[\w-]+", button_title):
@@ -257,7 +257,7 @@ class SubScene:
                 z_data_actions += ["true", html_content]
             if with_invert:
                 z_data_actions += [
-                    "!(" + "&&".join(full_condition) + ")",
+                    "&&".join(invert_full_condition),
                     html_content_disabled,
                 ]
         if rand_var is not None:
