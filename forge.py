@@ -106,6 +106,26 @@ class SubScene:
     def parse(self, lines: list[str]) -> "SubScene":
         action_raw = None
         for line in lines:
+            ignore_line = False
+            if action_raw is not None:
+                if (
+                    match := re.match(r"\* +\[\[([^\]]*)\]\]", line.strip())
+                ) is not None:
+                    ignore_line = True
+                    raw_subscene_name = escape_name(match.group(1))
+                    if raw_subscene_name == "":
+                        self.actions += [(action_raw, self.full_name)]
+                    elif raw_subscene_name == "#":
+                        self.actions += [(action_raw, f"{self.scene_name}")]
+                    elif raw_subscene_name.startswith("#"):
+                        self.actions += [
+                            (action_raw, f"{self.scene_name}{raw_subscene_name}")
+                        ]
+                    else:
+                        self.actions += [(action_raw, raw_subscene_name)]
+                else:
+                    self.actions += [(action_raw, None)]
+                action_raw = None
             if re.match(r"^/\w+", line):
                 cmd, *args = line.split(" ")
                 if cmd.lower() == "/set":
@@ -137,34 +157,7 @@ class SubScene:
                     self.has_error = True
             elif line.startswith("* "):
                 action_raw = line[2:]
-            elif (
-                action_raw is not None
-                and (match := re.match(r"\* +\[\[([^\]]*)\]\]", line.strip()))
-                is not None
-            ):
-                raw_subscene_name = escape_name(match.group(1))
-                if raw_subscene_name == "":
-                    self.actions += [(action_raw, self.full_name)]
-                elif raw_subscene_name == "#":
-                    self.actions += [(action_raw, f"{self.scene_name}")]
-                elif raw_subscene_name.startswith("#"):
-                    self.actions += [
-                        (action_raw, f"{self.scene_name}{raw_subscene_name}")
-                    ]
-                else:
-                    self.actions += [(action_raw, raw_subscene_name)]
-                action_raw = None
-            else:
-                if action_raw is not None:
-                    self.actions += [(action_raw, None)]
-                    print(
-                        Color.colorize(
-                            f"WARN: action '{action_raw}' has invalid link: '{line.strip().strip('*').strip()}' at @{self}@"
-                        ),
-                        file=sys.stderr,
-                    )
-                    action_raw = None
-                    self.has_error = True
+            elif not ignore_line:
                 self.raw_content += [line]
         if action_raw is not None:
             self.actions += [(action_raw, None)]
