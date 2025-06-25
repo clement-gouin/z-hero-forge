@@ -1,6 +1,4 @@
-usage: forge.py [-h] [-n NAMESPACE] [-p] [-d] [--output OUTPUT]
-                [--force FORCE]
-                DIR
+usage: forge.py [-h] [-n NAMESPACE] [-p] [-d] [--force] DIR
 
 creates a z-hero-quest adventure from markdown data (see sample directory or DOC.md)
 
@@ -13,8 +11,7 @@ options:
                         hero quest namespace (default: random)
   -p, --preview         show links tree in a preview.png file
   -d, --dry             do not compute links
-  --output OUTPUT       create a z-app linker file
-  --force FORCE         force computation even with errors
+  --force               force computation even with errors
 
 Markdown syntax uses extensions defined in https://python-markdown.github.io/extensions/ and https://facelessuser.github.io/pymdown-extensions/ 
 Active extensions:
